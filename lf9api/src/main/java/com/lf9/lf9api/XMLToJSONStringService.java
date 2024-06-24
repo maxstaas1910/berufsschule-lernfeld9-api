@@ -21,6 +21,7 @@ public class XMLToJSONStringService {
     var networkXMLAsDocument = readXMLFromFileAndParseToDocument();
     return convertToJSONAndFilterDevicesAndIPV6(networkXMLAsDocument);
   }
+
   private Document readXMLFromFileAndParseToDocument() {
     try {
       var file = new File(XML_FILE);
@@ -34,10 +35,9 @@ public class XMLToJSONStringService {
     }
   }
 
-  private JSONArray convertToJSONAndFilterDevicesAndIPV6(Document networkXMLAsDocument) {
+  JSONArray convertToJSONAndFilterDevicesAndIPV6(Document networkXMLAsDocument) {
     var devices = networkXMLAsDocument.getElementsByTagName("DEVICE");
     var deviceAmount = devices.getLength();
-    System.out.println(deviceAmount);
     var resultJson = new JSONArray();
 
     for (int i=0; i < deviceAmount; i++) {
@@ -47,11 +47,20 @@ public class XMLToJSONStringService {
         {
           var deviceJSON = new JSONArray();
           var device = (Element) node;
-          var deviceName = device.getElementsByTagName("NAME").item(0).getTextContent();
-          var deviceIPV6 = device.getElementsByTagName("ADDRESS").item(0).getTextContent();
-          var deviceNetMASK = device.getElementsByTagName("PREFIX").item(0).getTextContent();
-          var deviceFullIPV6 = deviceIPV6 + "/" + deviceNetMASK;
-
+          var deviceName = "";
+          var deviceFullIPV6 = "";
+          try {
+            deviceName = device.getElementsByTagName("NAME").item(0).getTextContent();
+          } catch (Exception e ) {
+            System.out.println(e.toString());
+          }
+          try {
+            var deviceIPV6 = device.getElementsByTagName("ADDRESS").item(0).getTextContent();
+            var deviceNetMASK = device.getElementsByTagName("PREFIX").item(0).getTextContent();
+            deviceFullIPV6 = deviceIPV6 + "/" + deviceNetMASK;
+          } catch (Exception e ) {
+            System.out.println(e.toString());
+          }
           try {
             deviceJSON.put(new JSONObject().put("name", deviceName));
             deviceJSON.put(new JSONObject().put("ipv6", deviceFullIPV6));
